@@ -31,6 +31,11 @@ class Converter:
         """
         return text[:1].upper() + text[1:]
 
+    @staticmethod
+    def to_camel_case_join_space(text: str):
+        # return "".join(x for x in text.title() if not x.isspace())
+        return "".join(text.split())
+
     def print_depth(self, message, depth):
         """ Pretty print """
         if self.verbose:
@@ -46,7 +51,8 @@ class Converter:
         """
         return {
             "type": "object",
-            "title": self.camel_case_split(swagger_ref),
+            # "title": self.camel_case_split(swagger_ref),
+            "title": self.to_camel_case_join_space(swagger_ref),
             "description": f"{self.camel_case_split(swagger_ref)} Entity"
         }
 
@@ -72,9 +78,11 @@ class Converter:
         :param depth: recursive depth
         :param camel_key: entity name
         """
+
         if camel_key not in self.swagger_definitions:
             self.print_depth(f'(xx) {camel_key} not found', depth)
             self.swagger_definitions[camel_key] = self.get_default_object_properties(camel_key)
+        self.swagger_definitions[camel_key]["title"] = camel_key
 
     def add_property(self, key, swagger_ref, prop_dict):
         """
@@ -148,6 +156,7 @@ class Converter:
             if swagger_ref in self.swagger_definitions:
                 self.add_property(key, swagger_ref, {
                     "type": self.get_object_type(obj_content),
+                    "description": self.camel_case_split(camel_key),
                     "example": obj_content
                 })
 
